@@ -37,4 +37,3 @@
          generate-company-trading-day
          generate-market-trading-day
          emit-market-pulses)
-

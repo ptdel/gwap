@@ -1,8 +1,8 @@
 (ns gwap.system
   (:gen-class)
   (:require [integrant.core :as ig]
-            [aleph.http :as http]
-            [gwap.primordial :as primordial]))
+            [gwap.primordial :as primordial]
+            [gwap.store :as store]))
 
 (defmethod ig/init-key ::config
   [_ {}]
@@ -19,21 +19,22 @@
           (repeatedly number-of-companies
                       #(primordial/create-company soup)))))
 
-(defmethod ig/init-key ::server
-  [_ {:keys [app config]}]
-  (let [port (:port config)]
-    (http/start-server app {:port port})))
+(defmethod ig/init-key ::time-series
+  [_ {:keys [companies]}]
+  (store/wcar*
+    (doall (map
+            #(store/ts-create (:ticker %) (store/company->ts %))
+            companies)))
+  (map #(:ticker %) companies))
 
-(defmethod ig/halt-key! ::server
-  [_ server]
-  (.close server))
+(defmethod ig/halt-key! ::time-series
+  [_ companies]
+  (store/wcar* (doall (map #(store/ts-delete %) companies))))
 
 (def universe {::config     {}
-               ::primordial {}
+               ::primordial {}      
                ::companies  {:soup (ig/ref ::primordial)}
-               ::app        {}
-               ::server     {:app    (ig/ref ::app)
-                             :config (ig/ref ::config)}})
+               ::time-series {:companies (ig/ref ::companies)}})
 
 (comment
   (def running-simulation (ig/init universe))

@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  cache:
+    image: redislabs/redismod
+    restart: always
+    ports:
+      - '6379:6379'
+    command: --loadmodule /usr/lib/redis/modules/redistimeseries.so
+    volumes: 
+      - cache:/data
+volumes:
+  cache:
+    driver: local

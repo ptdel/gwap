@@ -1,0 +1,10 @@
+{:title          "gwapper"
+ :port           8080
+ :streams        {"bootstrap.servers"         "localhost:9093"
+                  "client.id"                 "producer-of-gwap"
+                  "default.key.serde"         "jackdaw.serdes.EdnSerde"
+                  "default.value.serde"       "jackdaw.serdes.EdnSerde"
+                  "cache.max.bytes.buffering" "0"}
+ :client-config  {"bootstrap.servers" "localhost:9093"}
+ :topic-metadata {:partition-count    1
+                  :replication-factor 1}}
