@@ -1,7 +1,7 @@
 (ns gwap.primordial)
 
 (defn random-ticker []
-  (apply str (repeatedly 4 #(rand-nth "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))))
+  (apply str (repeatedly (rand-nth [3 4]) #(rand-nth "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))))
 
 (defn random-sector [sector-list]
   (rand-nth sector-list))

@@ -2,7 +2,8 @@
   (:gen-class)
   (:require [integrant.core :as ig]
             [gwap.primordial :as primordial]
-            [gwap.store :as store]))
+            [gwap.store :as store]
+            [gwap.util :as util]))
 
 (defmethod ig/init-key ::config
   [_ {}]
@@ -14,10 +15,11 @@
 
 (defmethod ig/init-key ::companies
   [_ {:keys [soup]}]
-  (let [number-of-companies (:number-of-companies soup)]
-    (into []
-          (repeatedly number-of-companies
-                      #(primordial/create-company soup)))))
+  (util/distinct-by :ticker
+    (loop [companies []]
+      (if (= (count (util/distinct-by :ticker companies)) (:number-of-companies soup))
+        companies
+        (recur (conj companies (primordial/create-company soup)))))))
 
 (defmethod ig/init-key ::time-series
   [_ {:keys [companies]}]

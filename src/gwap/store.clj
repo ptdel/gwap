@@ -9,7 +9,7 @@
 (defmacro wcar* [& body]
   `(car/wcar wcar-opts ~@body))
 
-(def now #(quot (System/currentTimeMillis) 1000))
+(defn now [] (quot (.getTime (java.util.Date.)) 1000))
 
 (defn get-names [m vs f]
   (reduce #(update-in % [%2] f) m vs))
@@ -22,24 +22,25 @@
   (mapv (fn [e] (if (keyword? e) (name e) e))
     (mapcat seq m)))
 
-(defn ts-data [timestamp data]
-  [(str (:ticker data)) (int timestamp) (double (:prices data))])
+(defn ts-data [data]
+  [(str (:ticker data)) "*" (double (:prices data))])
 
 (defn ts-create [name labels]
   (car/redis-call
-   (vec (concat ["TS.CREATE" (str name) "LABELS"]
-                (map->vec labels)))))
+   (vec (concat ["TS.CREATE" (str name)
+                 "DUPLICATE_POLICY" "LAST"
+                 "LABELS"] (map->vec labels)))))
 
 (defn ts-delete [time-series]
   (car/del time-series))
 
-(defn ts-add [time datapoint]
+(defn ts-add [datapoint]
   (car/redis-call
-   (cons "TS.ADD" (ts-data time datapoint))))
+   (cons "TS.ADD" (ts-data datapoint))))
 
-(defn ts-add-many [time datapoints]
+(defn ts-add-many [datapoints]
   (car/redis-call
-   (cons "TS.MADD" (mapcat #(ts-data time %) datapoints))))
+   (cons "TS.MADD" (mapcat #(ts-data %) datapoints))))
 
 (comment
   (wcar*
@@ -47,7 +48,7 @@
                                 :EXCHANGE "GANDYMEDE"})
     (ts-create "BBDD" {:DESC "SHARE_PRICE"
                                 :EXCHANGE "GANDYMEDE"})
-    (ts-add (now) {:ticker "QCDW" :price 12.22})
-    (ts-add (now) {:ticker "BBDD" :price 23.11})
-    (ts-add-many (+ 1 (now)) [{:ticker "QCDW" :prices 12.34}
+    (ts-add {:ticker "QCDW" :price 12.22})
+    (ts-add {:ticker "BBDD" :price 23.11})
+    (ts-add-many [{:ticker "QCDW" :prices 12.34}
                                    {:ticker "BBDD" :prices 23.56}])))
