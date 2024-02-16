@@ -9,7 +9,7 @@
 (defmacro wcar* [& body]
   `(car/wcar wcar-opts ~@body))
 
-(defn now [] (quot (.getTime (java.util.Date.)) 1000))
+(defn now [] (long (/ (System/currentTimeMillis) 1000)))
 
 (defn get-names [m vs f]
   (reduce #(update-in % [%2] f) m vs))
@@ -22,33 +22,37 @@
   (mapv (fn [e] (if (keyword? e) (name e) e))
     (mapcat seq m)))
 
-(defn ts-data [data]
-  [(str (:ticker data)) "*" (double (:prices data))])
+(defn ts-data [ts data]
+  [(str (:ticker data) ":INTRA") ts (double (:prices data))])
 
 (defn ts-create [name labels]
   (car/redis-call
    (vec (concat ["TS.CREATE" (str name)
-                 "DUPLICATE_POLICY" "LAST"
                  "LABELS"] (map->vec labels)))))
+
+(defn ts-create-rule [source destination aggregation duration]
+  (car/redis-call
+   (cons "TS.CREATERULE" [source destination
+                          "AGGREGATION" aggregation
+                          duration])))
 
 (defn ts-delete [time-series]
   (car/del time-series))
 
-(defn ts-add [datapoint]
+(defn ts-add [ts datapoint]
   (car/redis-call
-   (cons "TS.ADD" (ts-data datapoint))))
+   (cons "TS.ADD" (ts-data ts datapoint))))
 
-(defn ts-add-many [datapoints]
+(defn ts-add-many [ts datapoints]
   (car/redis-call
-   (cons "TS.MADD" (mapcat #(ts-data %) datapoints))))
+   (cons "TS.MADD" (mapcat #(ts-data ts %) datapoints))))
+
+(defn ts-create-company [company aggregation duration]
+  (let [intraday (str (:ticker company) ":INTRA")
+        closing  (str (:ticker company) ":CLOSE")]
+    (ts-create intraday (company->ts company))
+    (ts-create closing (company->ts company))
+    (ts-create-rule intraday closing aggregation duration)))
 
 (comment
-  (wcar*
-    (ts-create "QCDW" {:DESC "SHARE_PRICE"
-                                :EXCHANGE "GANDYMEDE"})
-    (ts-create "BBDD" {:DESC "SHARE_PRICE"
-                                :EXCHANGE "GANDYMEDE"})
-    (ts-add {:ticker "QCDW" :price 12.22})
-    (ts-add {:ticker "BBDD" :price 23.11})
-    (ts-add-many [{:ticker "QCDW" :prices 12.34}
-                                   {:ticker "BBDD" :prices 23.56}])))
+  (dotimes [day 365] (wcar* (doall (map #(ts-add-many (inc (- 365 day)) %) gwap.company/day-of-trades)))))

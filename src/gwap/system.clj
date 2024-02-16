@@ -25,7 +25,7 @@
   [_ {:keys [companies]}]
   (store/wcar*
     (doall (map
-            #(store/ts-create (:ticker %) (store/company->ts %))
+            #(store/ts-create-company % "last" 60000)
             companies)))
   (map #(:ticker %) companies))
 

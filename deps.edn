@@ -3,20 +3,15 @@
 
  :deps
  {;; Application
-  org.clojure/clojure         {:mvn/version "1.11.1"}
-  org.clojure/data.json       {:mvn/version "2.5.0"}
-  com.cognitect.aws/api       {:mvn/version "0.8.692"}
-  com.cognitect.aws/endpoints {:mvn/version "1.1.12.504"}
-  com.cognitect.aws/dynamodb  {:mvn/version "848.2.1413.0"}
-  com.taoensso/carmine        {:mvn/version "3.3.2"}
-  generateme/fastmath         {:mvn/version "2.3.0"}
-  com.brunobonacci/mulog      {:mvn/version "0.9.0"}
-  aleph/aleph                 {:mvn/version "0.6.4"}
-  manifold/manifold           {:mvn/version "0.4.1"}
-  metosin/muuntaja            {:mvn/version "0.6.8"}
-  metosin/malli               {:mvn/version "0.13.0"}
-  integrant/integrant         {:mvn/version "0.8.1"}
-  integrant/repl              {:mvn/version "0.3.3"}}
+  org.clojure/clojure               {:mvn/version "1.11.1"}
+  org.clojure/data.json             {:mvn/version "2.5.0"}
+  com.taoensso/carmine              {:mvn/version "3.3.2"}
+  generateme/fastmath               {:mvn/version "2.3.0"}
+  com.brunobonacci/mulog            {:mvn/version "0.9.0"}
+  manifold/manifold                 {:mvn/version "0.4.1"}
+  integrant/integrant               {:mvn/version "0.8.1"}
+  integrant/repl                    {:mvn/version "0.3.3"}
+  com.widdindustries/cljc.java-time {:mvn/version "0.1.21"}}
 
  :mvn/repos
  {"confluent" {:url "https://packages.confluent.io/maven/"}}

@@ -33,7 +33,10 @@
 
 (def test-config (edn/read-string (slurp "./config.edn")))
 
-(comment test-config
-         generate-company-trading-day
-         generate-market-trading-day
-         emit-market-pulses)
+(comment
+  (def day-of-trades 
+    (emit-market-pulses
+     (generate-market-trading-day
+      (:gwap.system/companies gwap.system/running-simulation)
+      test-config)
+     test-config)))
