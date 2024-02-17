@@ -1,15 +1,18 @@
 (ns gwap.clock
-  (:require [cljc.java-time.instant :as i]))
+  (:require [tick.core :as t]))
 
-(def quit (atom false))
+(def tick-rate 1000)
 
-(defn frametime [newtime current]
-  (if (> (- newtime current) 0.25) 0.25 (- newtime current)))
+(defn time-delta [a b]
+  (t/millis (t/between a b)))
 
-(while (false? quit)
-  (let [t 0.0
-        dt 0.01
-        current (System/currentTimeMillis)
-        newtime (System/currentTimeMillis)
-        frametime (frametime newtime current)
-        accumulator frametime]))
+(defn game-loop [start]
+  (loop [current (t/now)
+         elapsed current
+         lag (time-delta start current)]
+    (if (>= lag tick-rate)
+      (println "took this long to fuck up: " elapsed)
+      (do (Thread/sleep (int (* (rand) 1000))) 
+          (recur (t/now) (time-delta start current) (time-delta current (t/now)))))))
+
+(comment  (game-loop (t/now)))
