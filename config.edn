@@ -1,58 +1,62 @@
-{:number-of-companies 2700
- :trading-day-interval 78
- :stocks  {:mean       7.79175881415739e-6
-           :volatility 0.00270956180174906}
- :bonds   {:mean       -8.39029512533784e-9
-           :volatility 0.000681238496586276}
- :regions [{:name "americas" :modifier 0.5}
-           {:name "asia-pacific" :modifier -0.5}
-           {:name "emea" :modifier 0}
-           {:name "titan" :modifier 2.5}
-           {:name "ganymede" :modifier 1.5}
-           {:name "venutia" :modifier 1}
-           {:name "ceres" :modifier 2}]
- :sectors [{:name       "energy"
-            :modifier   1.5
-            :subsectors [{:name "equipment-and-refining" :modifier 0}
-                         {:name "exploration-and-drilling" :modifier 1}
-                         {:name "transportation-and-storage" :modifier -0.5}
-                         {:name "coal-and-consumable" :modifier 0.5}]}
-           {:name       "materials"
-            :modifier   1
-            :subsectors [{:name "chemicals-and-agricultural" :modifier 0.5}
-                         {:name "metals-and-mining" :modifier 1.5}
-                         {:name "paper-and-forest-products" :modifier 1}]}
-           {:name       "industrials"
-            :modifier   0.5
-            :subsectors [{:name "aerospace-and-defense" :modifier 1.5}
-                         {:name "construction-and-engineering" :modifier 1}
-                         {:name "shipping-and-transportation" :modifier 0.5}]}
-           {:name       "consumer"
-            :modifier   -0.5
-            :subsectors [{:name "vehicles" :modifier 0}
-                         {:name "food-and-beverages" :modifier 0.5}
-                         {:name "household-and-apparel" :modifier 0}]}
-           {:name       "healthcare"
-            :modifier   0
-            :subsectors [{:name "equipment-and-supplies" :modifier 0}
-                         {:name "providers-and-services" :modifier 0.5}
-                         {:name "biotechnology-and-pharmaceuticals" :modifier 1}]}
-           {:name       "financials"
-            :modifier   0.5
-            :subsectors [{:name "banks-and-consumer" :modifier 0}
-                         {:name "asset-management" :modifier 0.5}
-                         {:name "insurance-and-residential" :modifier -0.5}]}
-           {:name       "technology"
-            :modifier   1.5
-            :subsectors [{:name "personal-electronics" :modifier -0.5}
-                         {:name "semiconductors" :modifier 0.5}
-                         {:name "software-and-hardware" :modifier 0}]}
-           {:name       "communication"
-            :modifier   0.5
-            :subsectors [{:name "media-entertainment" :modifier 0}
-                         {:name "telecommunication" :modifier -0.5}]}
-           {:name       "utilities"
-            :modifier   0.5
-            :subsectors [{:name "gas-and-electric" :modifier 0}
-                         {:name "water" :modifier 1}
-                         {:name "independent-and-renewable" :modifier 0.5}]}]}
+{:save-file                "companies.edn"
+ :topic-name               "markets"
+ :number-of-companies      2700
+ :trading-days             4
+ :trading-day-open-percent 0.75
+ :trading-day-slices       1 ;; minutes
+ :stocks                   {:mean       7.79175881415739e-6
+                            :volatility 0.00270956180174906}
+ :bonds                    {:mean       -8.39029512533784e-9
+                            :volatility 0.000681238496586276}
+ :regions                  [{:name "americas" :modifier 0.5}
+                            {:name "asia-pacific" :modifier -0.5}
+                            {:name "emea" :modifier 0}
+                            {:name "titan" :modifier 2.5}
+                            {:name "ganymede" :modifier 1.5}
+                            {:name "venutia" :modifier 1}
+                            {:name "ceres" :modifier 2}]
+ :sectors                  [{:name       "energy"
+                             :modifier   1.5
+                             :subsectors [{:name "equipment-and-refining" :modifier 0}
+                                          {:name "exploration-and-drilling" :modifier 1}
+                                          {:name "transportation-and-storage" :modifier -0.5}
+                                          {:name "coal-and-consumable" :modifier 0.5}]}
+                            {:name       "materials"
+                             :modifier   1
+                             :subsectors [{:name "chemicals-and-agricultural" :modifier 0.5}
+                                          {:name "metals-and-mining" :modifier 1.5}
+                                          {:name "paper-and-forest-products" :modifier 1}]}
+                            {:name       "industrials"
+                             :modifier   0.5
+                             :subsectors [{:name "aerospace-and-defense" :modifier 1.5}
+                                          {:name "construction-and-engineering" :modifier 1}
+                                          {:name "shipping-and-transportation" :modifier 0.5}]}
+                            {:name       "consumer"
+                             :modifier   -0.5
+                             :subsectors [{:name "vehicles" :modifier 0}
+                                          {:name "food-and-beverages" :modifier 0.5}
+                                          {:name "household-and-apparel" :modifier 0}]}
+                            {:name       "healthcare"
+                             :modifier   0
+                             :subsectors [{:name "equipment-and-supplies" :modifier 0}
+                                          {:name "providers-and-services" :modifier 0.5}
+                                          {:name "biotechnology-and-pharmaceuticals" :modifier 1}]}
+                            {:name       "financials"
+                             :modifier   0.5
+                             :subsectors [{:name "banks-and-consumer" :modifier 0}
+                                          {:name "asset-management" :modifier 0.5}
+                                          {:name "insurance-and-residential" :modifier -0.5}]}
+                            {:name       "technology"
+                             :modifier   1.5
+                             :subsectors [{:name "personal-electronics" :modifier -0.5}
+                                          {:name "semiconductors" :modifier 0.5}
+                                          {:name "software-and-hardware" :modifier 0}]}
+                            {:name       "communication"
+                             :modifier   0.5
+                             :subsectors [{:name "media-entertainment" :modifier 0}
+                                          {:name "telecommunication" :modifier -0.5}]}
+                            {:name       "utilities"
+                             :modifier   0.5
+                             :subsectors [{:name "gas-and-electric" :modifier 0}
+                                          {:name "water" :modifier 1}
+                                          {:name "independent-and-renewable" :modifier 0.5}]}]}

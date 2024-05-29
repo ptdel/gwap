@@ -1,49 +1,29 @@
 (ns gwap.clock
-  (:require [tick.core :as t]))
+  (:require [tick.core :as t]
+            [tick.alpha.interval :as ti]
+            [gwap.util :as u]))
 
 ;; the atomic clock will return the current time whenever it is deref'd (`@`)
-(def clock (t/atom))
+(def right-now (t/atom))
 
 ;; TODO: move the start time into the system
 (def start-time (t/now))
 
-(defn elapsed [] (t/between start-time @clock))
+(defn elapsed [] (t/between start-time @right-now))
 
-;; We can create some sort of formulaic means of deriving a trading day given
-;; some set of inputs if we want to scale the day "up or down" for now this
-;; will have to work.
-(def trading-day-schedule [{:phase          :alpha
-                            :stage          :open
-                            :tick/beginning (t/midnight)
-                            :tick/end       (t/time "05:12")}
-                           {:phase          :alpha
-                            :stage          :closed
-                            :tick/beginning (t/time "05:12")
-                            :tick/end       (t/time "06:00")}
-                           {:phase          :beta
-                            :stage          :open
-                            :tick/beginning (t/time "06:00")
-                            :tick/end       (t/time "11:12")}
-                           {:phase          :beta
-                            :stage          :closed
-                            :tick/beginning (t/time "11:12")
-                            :tick/end       (t/noon)}
-                           {:phase          :gamma
-                            :stage          :open
-                            :tick/beginning (t/noon)
-                            :tick/end       (t/time "17:12")}
-                           {:phase          :gamma
-                            :stage          :closed
-                            :tick/beginning (t/time "17:12")
-                            :tick/end       (t/time "18:00")}
-                           {:phase          :delta
-                            :stage          :open
-                            :tick/beginning (t/time "18:00")
-                            :tick/end       (t/time "23:12")}
-                           {:phase          :delta
-                            :stage          :closed
-                            :tick/beginning (t/time "23:12")
-                            :tick/end       (t/midnight)}])
+(defn to-interval [duration]
+  (let [dur (sort duration)]
+    (ti/new-interval (first dur) (last dur))))
+
+(defn to-intervals [durations]
+  (map (fn [d] (map #(to-interval %) d)) durations))
+
+(defn derive-day-phases [divisor]
+  (into [] (map #(to-interval %)
+                (ti/divide-by-divisor (ti/bounds (t/today)) divisor))))
+
+(defn derive-phase-durations [phases duration]
+  (map #(ti/divide-by-duration % duration) phases))
 
 ;; we use `compare` rather than numerical operators like `<` and `>` to avoid
 ;; having clojure try to coerce or inputs to numerical types.
@@ -52,15 +32,20 @@
 
 ;; checks whether or not the current timestamp falls within range of the
 ;; interval for a stage
-(defn in-stage? [ts stage]
-  (let [current (map stage [:tick/beginning :tick/end])]
+(defn in-stage? [stage ts]
+  (let [current (map #(t/time %) (map stage [:tick/beginning :tick/end]))]
     (between? (t/time ts) (first current) (last current))))
 
 ;; iterates over the trading day schedule and returns the current trading
 ;; phase given the a deref of the clock
-(defn get-current-phase [ts schedule]
-  (into {} (filter #(in-stage? ts %) schedule)))
+(defn get-current-phase [schedule ts]
+  (into {} (filter #(in-stage? % ts) schedule)))
+
+(defn create-trading-days [open-percent phases duration]
+  (into [] (flatten (map-indexed
+    (fn [i x] (u/split-open-close-by-percent x i open-percent))
+      (to-intervals (derive-phase-durations (derive-day-phases phases)
+                                            (t/of-minutes duration)))))))
 
 (comment
-  elapsed
-  (get-current-phase @clock trading-day-schedule))
+  (def trading-days (create-trading-days 0.75 3 5)))
