@@ -35,12 +35,16 @@
 (defmethod ig/init-key ::diurnal-cycle
   [_ {:keys [soup]}]
   (let [trading-days (:trading-days soup)
-        open-percent (:trading-day-open-percent soup)
-        trading-day-slices (:trading-day-slices soup)]
+        open-periods (:trading-day-open-periods soup)
+        total-trading-day-periods (:total-trading-day-periods soup)]
     (clock/create-trading-days
-     open-percent
      trading-days
-     trading-day-slices)))
+     total-trading-day-periods
+     open-periods)))
+
+(defmethod ig/init-key ::period
+  [_ {:keys [schedule]}]
+  (clock/get-period-duration schedule))
 
 (defmethod ig/init-key ::companies
   [_ {:keys [soup]}]
@@ -64,17 +68,20 @@
   (.close server))
 
 (defmethod ig/init-key ::market-cycle
-  [_ {:keys [soup pool schedule companies]}]
-  (game/gameloop! soup pool schedule companies))
+  [_ {:keys [pool schedule companies]}]
+  (game/gameloop! pool schedule companies))
 
 (def universe {::config        {}
                ::primordial    {}
                ::bus           {}
                ::schedule-pool {:soup (ig/ref ::primordial)}
                ::diurnal-cycle {:soup (ig/ref ::primordial)}
+               ::period        {:schedule (ig/ref ::diurnal-cycle)}
                ::companies     {:soup (ig/ref ::primordial)}
-               ::endpoints     {:config {:bus   (ig/ref ::bus)
-                                         :topic (:topic-name (ig/ref ::primordial))}}
+               ::endpoints     {:config   {:bus    (ig/ref ::bus)
+                                           :topic  (:topic-name (ig/ref ::primordial))
+                                           :period (ig/ref ::period)}
+                                :schedule (ig/ref ::diurnal-cycle)}
                ::server        {:endpoints (ig/ref ::endpoints)
                                 :config    (ig/ref ::config)}
                ::market-cycle  {:soup      (ig/ref ::primordial)
@@ -86,4 +93,3 @@
 (comment
   (def running-simulation (ig/init universe))
   (ig/halt! running-simulation))
- 

@@ -6,7 +6,13 @@
    [muuntaja.core :as m]
    [reitit.dev.pretty :as pretty]
    [reitit.ring :as ring]
+   [reitit.ring.coercion :as rrc]
    [reitit.middleware :as middleware]
+   [reitit.ring.middleware.exception :as exception]
+   [reitit.ring.middleware.parameters :as parameters]
+   [reitit.ring.middleware.muuntaja :as muuntaja]
+   [reitit.coercion.malli]
+   [gwap.util :as u]
    [gwap.game :as gg]))
 
 (def invalid-request
@@ -14,17 +20,22 @@
    :headers {"content-type" "application/text"}
    :body "Invalid Connection"})
 
+(def headers
+  {:headers {"Sec-Websocket-Protocol" "demo-chat"}})
+
 (defn market-handler [req]
-  (defer/let-flow [socket (http/websocket-connection req {:headers {"Sec-Websocket-Protocol" "demo-chat"}})
-                   ticker (-> req :path-params :ticker)]
+  (defer/let-flow [socket (http/websocket-connection req headers)
+                   tickers (-> req :parameters :query :ticker)
+                   period (:period req)]
     (if-not socket invalid-request
             (stream/connect
-             (stream/periodically 10000
+             (stream/periodically period
                #(->> @gg/persisted-companies
-                     (filter (fn [e] (= (:ticker e) ticker)))
-                     (into {})
+                     (u/filter-tickers tickers)
+                     (into [])
                      (m/encode "application/json")
-                     (slurp))) socket))))
+                     (slurp)))
+             socket))))
 
 (defn wrap [handler dep]
   (fn [request] (handler (merge request dep))))
@@ -33,10 +44,16 @@
   (ring/ring-handler
    (ring/router
     ["/api"
-     ["/market/:ticker" {:name       ::market-handler
-                         :parameters {:path {:topic string?}}
-                         :middleware [:wrap]
-                         :get        market-handler}]]
+     ["/market" {:name       ::market-handler
+                 :parameters {:query {:ticker [:or [:vector string?] string?]}}
+                 :middleware [:wrap]
+                 :get        market-handler}]]
     {:exception            pretty/exception
-     ::middleware/registry {:wrap [wrap config]}})
+     ::middleware/registry {:wrap [wrap config]}
+     :data                 {:coercion   reitit.coercion.malli/coercion
+                            :muuntaja   m/instance
+                            :middleware [muuntaja/format-middleware
+                                         parameters/parameters-middleware
+                                         exception/exception-middleware
+                                         rrc/coerce-request-middleware]}})
    (ring/create-default-handler)))

@@ -3,7 +3,7 @@
 
  :deps
  {;; Application
-  org.clojure/clojure               {:mvn/version "1.11.1"}
+  org.clojure/clojure               {:mvn/version "1.11.3"}
   com.taoensso/carmine              {:mvn/version "3.3.2"}
   generateme/fastmath               {:mvn/version "2.3.0"}
   com.brunobonacci/mulog            {:mvn/version "0.9.0"}
@@ -15,10 +15,14 @@
   com.widdindustries/cljc.java-time {:mvn/version "0.1.21"}
   aleph/aleph                       {:mvn/version "0.7.1"}
   metosin/reitit                    {:mvn/version "0.7.0-alpha7"}
+  metosin/reitit-core               {:mvn/version "0.7.0-alpha7"}
   metosin/reitit-dev                {:mvn/version "0.7.0-alpha7"}
   metosin/reitit-ring               {:mvn/version "0.7.0-alpha7"}
+  metosin/reitit-middleware         {:mvn/version "0.7.0-alpha7"}
   metosin/muuntaja                  {:mvn/version "0.6.8"}
-  metosin/malli                     {:mvn/version "0.14.0"}}
+  metosin/malli                     {:mvn/version "0.14.0"}
+  ;; implicit reitit-middleware dependency...
+  javax.servlet/javax.servlet-api   {:mvn/version "3.1.0"}}
 
  :mvn/repos
  {"confluent" {:url "https://packages.confluent.io/maven/"}}
@@ -28,9 +32,9 @@
   :run/app
   {:main-opts ["-m" "gwap"]}
 
-  ;; Add libraries and paths to support additional test tools
-  :test/env
-  {}
+  :docs/marginalia
+  {:extra-deps {marginalia/marginalia {:mvn/version "0.9.2"}}
+   :main-opts  ["-m" "marginalia.main" "-n" "gwap" "src" "test"]}
 
   ;; Test runner - local and CI
   :test/run

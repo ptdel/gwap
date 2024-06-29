@@ -16,14 +16,11 @@
     (ti/new-interval (first dur) (last dur))))
 
 (defn to-intervals [durations]
-  (map (fn [d] (map #(to-interval %) d)) durations))
+  (into [] (map (fn [d] (map #(to-interval %) d)) durations)))
 
-(defn derive-day-phases [divisor]
+(defn derive-in-game-days [divisor]
   (into [] (map #(to-interval %)
                 (ti/divide-by-divisor (ti/bounds (t/today)) divisor))))
-
-(defn derive-phase-durations [phases duration]
-  (map #(ti/divide-by-duration % duration) phases))
 
 ;; we use `compare` rather than numerical operators like `<` and `>` to avoid
 ;; having clojure try to coerce or inputs to numerical types.
@@ -40,12 +37,22 @@
 ;; phase given the a deref of the clock
 (defn get-current-phase [schedule ts]
   (into {} (filter #(in-stage? % ts) schedule)))
+ 
+(defn divide-in-game-days [days period]
+  (into [] (map #(ti/divide-by-divisor % period) days)))
 
-(defn create-trading-days [open-percent phases duration]
-  (into [] (flatten (map-indexed
-    (fn [i x] (u/split-open-close-by-percent x i open-percent))
-      (to-intervals (derive-phase-durations (derive-day-phases phases)
-                                            (t/of-minutes duration)))))))
+(defn create-trading-days [days total-periods open-periods]
+  {:pre [(< open-periods total-periods)]}
+  (let [in-game-days         (derive-in-game-days days)
+        divided-in-game-days (divide-in-game-days in-game-days total-periods)]
+   (into []
+         (flatten
+          (map-indexed
+           (fn [day value] (u/split-open-close value day open-periods))
+           (to-intervals divided-in-game-days))))))
+
+(defn get-period-duration [schedule]
+  (t/millis (t/duration (first schedule))))
 
 (comment
-  (def trading-days (create-trading-days 0.75 3 5)))
+  (def days (create-trading-days 4 20 16)))

@@ -4,8 +4,13 @@
   (let [groups (group-by f coll)]
     (map #(first (groups %)) (distinct (map f coll)))))
 
-(defn split-open-close-by-percent [coll index percent]
-  (let [c (count coll)
-        t (* c percent)]
-    [(map #(assoc % :index index :open true) (take t coll))
-     (map #(assoc % :index index :open false) (drop t coll))]))
+(defn split-open-close [coll day open]
+    [(map #(assoc % :day day :open true) (take open coll))
+     (map #(assoc % :day day :open false) (drop open coll))])
+
+(defn filter-tickers [tickers companies]
+  (cond (string? tickers)
+        (filter (fn [v] (= (:ticker v) tickers)) companies)
+        (coll? tickers)
+        (let [t (set tickers)]
+          (filter (fn [v] (t (:ticker v))) companies))))
