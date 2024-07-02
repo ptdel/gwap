@@ -6,6 +6,7 @@
 
 (def persisted-companies (atom nil))
 
+;; TODO: write the persisted-companies to the disk each market-cycle
 (defn gameloop! [pool schedule companies]
   (let [interval (gc/get-period-duration schedule)]
     (reset! persisted-companies companies)

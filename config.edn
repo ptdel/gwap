@@ -1,9 +1,18 @@
 {:save-file                 "companies.edn"
  :topic-name                "markets"
- :number-of-companies       2700
- :trading-days              4
- :trading-day-open-periods  16
- :total-trading-day-periods 100
+ :number-of-companies       1600
+ :market-cap-modifiers      {:mega  {:modifier   0.75
+                                     :percentile 97.5}
+                             :large {:modifier   0.875
+                                     :percentile 85.0}
+                             :mid   {:modifier   1
+                                     :percentile 60.0}
+                             :small {:modifiler  1.125
+                                     :percentile 59.9}} ;; anything lower than 60% essentially
+ :crash-threshold           3
+ :trading-days              12
+ :trading-day-open-periods  195
+ :total-trading-day-periods 240
  :stocks                    {:mean       3.03969777147535E-4
                              :volatility 0.0119651009409213}
  :regions                   [{:name "americas" :modifier 0.5}

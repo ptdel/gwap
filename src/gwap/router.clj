@@ -12,6 +12,7 @@
    [reitit.ring.middleware.parameters :as parameters]
    [reitit.ring.middleware.muuntaja :as muuntaja]
    [reitit.coercion.malli]
+   [com.brunobonacci.mulog :as log]
    [gwap.util :as u]
    [gwap.game :as gg]))
 
@@ -21,10 +22,10 @@
    :body "Invalid Connection"})
 
 (def headers
-  {:headers {"Sec-Websocket-Protocol" "demo-chat"}})
+  {:headers {"Sec-Websocket-Protocol" "gwap"}})
 
 (defn market-handler [req]
-  (defer/let-flow [socket (http/websocket-connection req headers)
+  (defer/let-flow [socket (http/websocket-connection req)
                    tickers (-> req :parameters :query :ticker)
                    period (:period req)]
     (if-not socket invalid-request
@@ -37,6 +38,12 @@
                      (slurp)))
              socket))))
 
+(defn ping-handler [req]
+  (log/log ::new-connection :data req)
+  (-> (defer/let-flow [socket (http/websocket-connection req)]
+        (stream/connect (stream/periodically 1000 #(str "hello")) socket))
+      (defer/catch (fn [_] invalid-request))))
+
 (defn wrap [handler dep]
   (fn [request] (handler (merge request dep))))
 
@@ -44,6 +51,8 @@
   (ring/ring-handler
    (ring/router
     ["/api"
+     ["/ping" {:name ::ping
+               :get  ping-handler}]
      ["/market" {:name       ::market-handler
                  :parameters {:query {:ticker [:or [:vector string?] string?]}}
                  :middleware [:wrap]
